@@ -1,7 +1,6 @@
 import co.schrom.demo.Category
 import co.schrom.demo.Post
 import co.schrom.demo.User
-import co.schrom.orm.EntityMeta
 import co.schrom.orm.postgres.PostgresOrmFactory
 
 fun main(args: Array<String>) {
@@ -14,5 +13,7 @@ fun main(args: Array<String>) {
 
     val orm = PostgresOrmFactory().createOrm("jdbc:postgresql://localhost:5432/orm", "postgres", "postgres")
 
-    EntityMeta(User::class)
+    orm.createTable(User::class)
+    orm.createTable(Category::class)
+    orm.createTable(Post::class)
 }

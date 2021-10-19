@@ -9,4 +9,6 @@ interface Orm {
     fun dropTableIfExists(kClass: KClass<*>)
 
     fun createTable(kClass: KClass<*>)
+
+    fun create(obj: Any): Boolean
 }

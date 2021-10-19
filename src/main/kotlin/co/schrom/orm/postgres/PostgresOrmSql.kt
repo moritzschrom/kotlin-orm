@@ -21,7 +21,7 @@ object PostgresOrmSql : OrmSql {
     }
 
     override fun createTable(entity: EntityMeta): String {
-        val builder = StringBuilder(" create table ").append(entity.table).append(" ( ")
+        val builder = StringBuilder("create table ").append(entity.table).append("( ")
         entity.fields.forEachIndexed(fun(index, field) {
             // Column
             builder.append(field.column).append(" ")
@@ -30,15 +30,15 @@ object PostgresOrmSql : OrmSql {
             builder.append(typeDefinition(field)).append(" ")
 
             // Nullable
-            if(field.isNullable) builder.append(" not null ")
+            if(!field.isNullable) builder.append("not null ")
 
             // Primary key
-            if(field.isPrimaryKey) builder.append(" primary key ")
+            if(field.isPrimaryKey) builder.append("primary key ")
 
             // No comma for last column
-            if(index < entity.fields.size - 1) builder.append(" , ")
+            if(index < entity.fields.size - 1) builder.append(", ")
         })
-        builder.append(" ); ")
+        builder.append(");")
 
         return builder.toString()
     }

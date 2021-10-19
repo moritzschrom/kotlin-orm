@@ -18,8 +18,11 @@ fun main(args: Array<String>) {
     orm.dropTableIfExists(Category::class)
     orm.dropTableIfExists(Post::class)
 
-    // Creates
+    // Create tables
     orm.createTable(User::class)
     orm.createTable(Category::class)
     orm.createTable(Post::class)
+
+    // Create model in database
+    orm.create(author)
 }

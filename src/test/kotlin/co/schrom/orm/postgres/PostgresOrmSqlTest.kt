@@ -106,4 +106,32 @@ class PostgresOrmSqlTest {
         // Assert
         assertEquals("create table t_table( id integer not null primary key , name varchar(255) );", sql)
     }
+
+    @Test
+    fun insert_SimpleEntity_CorrectSqlReturned() {
+        // Arrange
+        val entity = mockk<EntityMeta>()
+        every { entity.table } returns "t_table"
+        every { entity.fields } returns arrayListOf(
+            mockk {
+                every { column } returns "id"
+                every { type } returns Int::class.createType()
+                every { isPrimaryKey } returns true
+                every { isNullable } returns false
+            },
+            mockk {
+                every { column } returns "title"
+                every { type } returns String::class.createType()
+                every { length } returns 255
+                every { isPrimaryKey } returns false
+                every { isNullable } returns false
+            }
+        )
+
+        // Act
+        val sql = PostgresOrmSql.insert(entity)
+
+        // Assert
+        assertEquals("insert into t_table( id , title ) values( ? , ? );", sql)
+    }
 }

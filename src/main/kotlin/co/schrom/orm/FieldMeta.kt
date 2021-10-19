@@ -2,13 +2,15 @@ package co.schrom.orm
 
 import co.schrom.orm.annotations.Field
 import co.schrom.orm.annotations.PrimaryKey
-import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.hasAnnotation
 
-class FieldMeta(kProperty: KProperty<*>) {
+class FieldMeta(kProperty: KProperty1<*, *>) {
 
     val column: String
+
+    val property: KProperty1<*, *>
 
     val type: KType
 
@@ -23,6 +25,9 @@ class FieldMeta(kProperty: KProperty<*>) {
         val fieldAnnotation = kProperty.annotations.find { it is Field } as? Field
 
         if(fieldAnnotation !is Field) throw Exception("Could not create FieldMeta. The property does not contain the Field annotation.")
+
+        // Save the property
+        property = kProperty
 
         // Set the column name property
         column = if(fieldAnnotation.column == "") {

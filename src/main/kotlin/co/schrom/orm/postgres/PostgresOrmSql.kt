@@ -48,4 +48,18 @@ object PostgresOrmSql : OrmSql {
         return builder.toString()
     }
 
+    override fun insert(entity: EntityMeta): String {
+        val builder = StringBuilder("insert into ").append(entity.table).append("( ")
+        entity.fields.forEachIndexed(fun(index, field) {
+            builder.append(field.column).append(" ")
+            // No comma for last column
+            if(index < entity.fields.size - 1) builder.append(", ")
+        })
+        builder.append(") values( ")
+        repeat(entity.fields.size - 1) { builder.append("? , ") }
+        builder.append("? );")
+
+        return builder.toString()
+    }
+
 }

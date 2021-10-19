@@ -4,7 +4,7 @@ import co.schrom.orm.annotations.Entity
 import co.schrom.orm.annotations.Field
 import co.schrom.orm.annotations.PrimaryKey
 
-@Entity
+@Entity(table = "t_user")
 class User(
     @Field
     @PrimaryKey

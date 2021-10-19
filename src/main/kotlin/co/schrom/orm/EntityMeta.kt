@@ -23,7 +23,7 @@ class EntityMeta(kClass: KClass<*>) {
 
         // Set the table name
         table = if(entityAnnotation.table == "") {
-            kClass.simpleName?.uppercase().toString()
+            kClass.simpleName?.lowercase().toString()
         } else {
             entityAnnotation.table
         }

@@ -2,7 +2,6 @@ package co.schrom.orm
 
 import co.schrom.orm.annotations.Field
 import co.schrom.orm.annotations.PrimaryKey
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.hasAnnotation

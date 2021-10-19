@@ -20,6 +20,11 @@ object PostgresOrmSql : OrmSql {
         throw Exception("Field type is not supported.")
     }
 
+    override fun dropTableIfExists(entity: EntityMeta): String {
+        val builder = StringBuilder("drop table if exists ").append(entity.table).append(" cascade;")
+        return builder.toString()
+    }
+
     override fun createTable(entity: EntityMeta): String {
         val builder = StringBuilder("create table ").append(entity.table).append("( ")
         entity.fields.forEachIndexed(fun(index, field) {

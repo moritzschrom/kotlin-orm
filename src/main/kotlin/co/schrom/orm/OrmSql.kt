@@ -4,6 +4,8 @@ interface OrmSql {
 
     fun typeDefinition(field: FieldMeta): String
 
+    fun dropTableIfExists(entity: EntityMeta): String
+
     fun createTable(entity: EntityMeta): String
 
 }

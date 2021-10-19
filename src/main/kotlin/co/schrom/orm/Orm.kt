@@ -6,5 +6,7 @@ import kotlin.reflect.KClass
 interface Orm {
     val connection: Connection
 
+    fun dropTableIfExists(kClass: KClass<*>)
+
     fun createTable(kClass: KClass<*>)
 }

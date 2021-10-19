@@ -13,6 +13,12 @@ fun main(args: Array<String>) {
 
     val orm = PostgresOrmFactory().createOrm("jdbc:postgresql://localhost:5432/orm", "postgres", "postgres")
 
+    // Cleanup
+    orm.dropTableIfExists(User::class)
+    orm.dropTableIfExists(Category::class)
+    orm.dropTableIfExists(Post::class)
+
+    // Creates
     orm.createTable(User::class)
     orm.createTable(Category::class)
     orm.createTable(Post::class)

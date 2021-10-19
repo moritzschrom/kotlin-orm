@@ -39,7 +39,20 @@ class PostgresOrmSqlTest {
     }
 
     @Test
-    fun createTable_EntityMetaWithTwoColumns_CorrectSqlReturned() {
+    fun dropTableIfExists_SimpleEntity_CorrectSqlReturned() {
+        // Arrange
+        val entity = mockk<EntityMeta>()
+        every { entity.table } returns "t_table"
+
+        // Act
+        val sql = PostgresOrmSql.dropTableIfExists(entity)
+
+        // Assert
+        assertEquals("drop table if exists t_table cascade;", sql)
+    }
+
+    @Test
+    fun createTable_SimpleEntity_CorrectSqlReturned() {
         // Arrange
         val entity = mockk<EntityMeta>()
         every { entity.table } returns "t_table"

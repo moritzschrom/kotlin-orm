@@ -4,6 +4,7 @@ import co.schrom.orm.EntityMeta
 import co.schrom.orm.Orm
 import java.sql.Connection
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 class PostgresOrm(override val connection: Connection) : Orm {
 
@@ -29,6 +30,27 @@ class PostgresOrm(override val connection: Connection) : Orm {
         val statement = connection.createStatement()
         statement.execute(sql)
         statement.close()
+    }
+
+    override fun create(obj: Any): Boolean {
+        // Create an EntityMeta model
+        val entity = EntityMeta(obj::class)
+
+        // Retrieve the SQL string
+        val sql = PostgresOrmSql.insert(entity)
+
+        val preparedStatement = connection.prepareStatement(sql)
+        entity.fields.forEachIndexed(fun(index, field) {
+            val property = field.property as KProperty1<Any, *>
+            val value = property.get(obj)
+
+            // Plus 1 because prepared statement index starts at 1
+            preparedStatement.setObject(index + 1 , value)
+        })
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+
+        return success
     }
 
 }

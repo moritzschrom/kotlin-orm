@@ -1,6 +1,7 @@
 import co.schrom.demo.Category
 import co.schrom.demo.Post
 import co.schrom.demo.User
+import co.schrom.orm.EntityMeta
 import co.schrom.orm.postgres.PostgresOrmFactory
 
 fun main(args: Array<String>) {
@@ -12,4 +13,6 @@ fun main(args: Array<String>) {
     val eventsPost = Post(1, "Some event", "Lorem ipsum dolor sit amet, consetetur sadipscing elitr.", author, eventsCategory)
 
     val orm = PostgresOrmFactory().createOrm("jdbc:postgresql://localhost:5432/orm", "postgres", "postgres")
+
+    EntityMeta(User::class)
 }

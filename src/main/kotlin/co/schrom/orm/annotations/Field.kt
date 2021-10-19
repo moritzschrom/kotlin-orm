@@ -1,6 +1,6 @@
 package co.schrom.orm.annotations
 
-@Target(AnnotationTarget.FIELD)
+@Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Field(
     val column: String = "",

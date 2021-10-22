@@ -30,4 +30,8 @@ fun main(args: Array<String>) {
 
     // Delete model in database
     orm.delete(authorToBeDeleted)
+
+    // Update model in database
+    val authorUpdated = User(1, "Alex Doe Updated", "alex.doe.updated@example.org")
+    orm.update(authorUpdated)
 }

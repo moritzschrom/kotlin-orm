@@ -136,6 +136,43 @@ class PostgresOrmSqlTest {
     }
 
     @Test
+    fun update_SimpleEntity_CorrectSqlReturned() {
+        // Arrange
+        val entity = mockk<EntityMeta>()
+        val idField: FieldMeta = mockk {
+            every { column } returns "id"
+            every { type } returns Int::class.createType()
+            every { isPrimaryKey } returns true
+            every { isNullable } returns false
+        }
+        every { entity.table } returns "t_table"
+        every { entity.primaryKey } returns idField
+        every { entity.fields } returns arrayListOf(
+            idField,
+            mockk {
+                every { column } returns "name"
+                every { type } returns String::class.createType()
+                every { length } returns 255
+                every { isPrimaryKey } returns false
+                every { isNullable } returns false
+            },
+            mockk {
+                every { column } returns "description"
+                every { type } returns String::class.createType()
+                every { length } returns 255
+                every { isPrimaryKey } returns false
+                every { isNullable } returns false
+            }
+        )
+
+        // Act
+        val sql = PostgresOrmSql.update(entity)
+
+        // Assert
+        assertEquals("update t_table set name = ? , description = ? where id = ?;", sql)
+    }
+
+    @Test
     fun delete_SimpleEntity_CorrectSqlReturned() {
         // Arrange
         val entity = mockk<EntityMeta>()

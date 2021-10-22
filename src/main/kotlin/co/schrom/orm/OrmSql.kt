@@ -10,6 +10,8 @@ interface OrmSql {
 
     fun insert(entity: EntityMeta): String
 
+    fun update(entity: EntityMeta): String
+
     fun delete(entity: EntityMeta): String
 
 }

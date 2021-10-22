@@ -53,6 +53,38 @@ class PostgresOrm(override val connection: Connection) : Orm {
         return success
     }
 
+    override fun update(obj: Any): Boolean {
+        // Create an EntityMeta model
+        val entity = EntityMeta(obj::class)
+
+        // Retrieve the SQL string
+        val sql = PostgresOrmSql.update(entity)
+
+        val preparedStatement = connection.prepareStatement(sql)
+
+        // First set the normal fields
+        val fieldsWithoutPrimary = entity.fields.filter { field -> !field.isPrimaryKey }
+        var index = 1
+        fieldsWithoutPrimary.forEach(fun(field) {
+            val property = field.property as KProperty1<Any, *>
+            val value = property.get(obj)
+
+            // Plus 1 because prepared statement index starts at 1
+            preparedStatement.setObject(index++ , value)
+        })
+
+        // Then set the primary key as last argument
+        val primaryProperty = entity.primaryKey.property as KProperty1<Any, *>
+        val primaryValue = primaryProperty.get(obj)
+        preparedStatement.setObject(index, primaryValue)
+
+        // Execute
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+
+        return success
+    }
+
     override fun delete(obj: Any): Boolean {
         // Create an EntityMeta model
         val entity = EntityMeta(obj::class)

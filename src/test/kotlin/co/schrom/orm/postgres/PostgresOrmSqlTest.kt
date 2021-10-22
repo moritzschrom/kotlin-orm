@@ -134,4 +134,23 @@ class PostgresOrmSqlTest {
         // Assert
         assertEquals("insert into t_table( id , title ) values( ? , ? );", sql)
     }
+
+    @Test
+    fun delete_SimpleEntity_CorrectSqlReturned() {
+        // Arrange
+        val entity = mockk<EntityMeta>()
+        every { entity.table } returns "t_table"
+        every { entity.primaryKey } returns mockk {
+            every { column } returns "pk_id"
+            every { type } returns Int::class.createType()
+            every { isPrimaryKey } returns true
+            every { isNullable } returns false
+        }
+
+        // Act
+        val sql = PostgresOrmSql.delete(entity)
+
+        // Assert
+        assertEquals("delete from t_table where pk_id = ?;", sql)
+    }
 }

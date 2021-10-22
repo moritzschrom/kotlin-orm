@@ -11,4 +11,6 @@ interface Orm {
     fun createTable(kClass: KClass<*>)
 
     fun create(obj: Any): Boolean
+
+    fun delete(obj: Any): Boolean
 }

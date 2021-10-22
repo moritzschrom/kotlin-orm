@@ -53,4 +53,20 @@ class PostgresOrm(override val connection: Connection) : Orm {
         return success
     }
 
+    override fun delete(obj: Any): Boolean {
+        // Create an EntityMeta model
+        val entity = EntityMeta(obj::class)
+
+        // Retrieve the SQL string
+        val sql = PostgresOrmSql.delete(entity)
+
+        val preparedStatement = connection.prepareStatement(sql)
+        val property = entity.primaryKey.property as KProperty1<Any, *>
+        preparedStatement.setObject(1 , property.get(obj))
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+
+        return success
+    }
+
 }

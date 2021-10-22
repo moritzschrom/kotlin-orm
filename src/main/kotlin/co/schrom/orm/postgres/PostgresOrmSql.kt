@@ -62,4 +62,14 @@ object PostgresOrmSql : OrmSql {
         return builder.toString()
     }
 
+    override fun delete(entity: EntityMeta): String {
+        val builder = StringBuilder("delete from ")
+            .append(entity.table)
+            .append(" where ")
+            .append(entity.primaryKey.column)
+            .append(" = ?;")
+
+        return builder.toString()
+    }
+
 }

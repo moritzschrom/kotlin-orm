@@ -12,5 +12,7 @@ interface Orm {
 
     fun create(obj: Any): Boolean
 
+    fun update(obj: Any): Boolean
+
     fun delete(obj: Any): Boolean
 }

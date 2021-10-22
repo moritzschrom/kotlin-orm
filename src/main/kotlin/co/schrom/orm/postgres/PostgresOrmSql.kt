@@ -62,6 +62,19 @@ object PostgresOrmSql : OrmSql {
         return builder.toString()
     }
 
+    override fun update(entity: EntityMeta): String {
+        val builder = StringBuilder("update ").append(entity.table).append(" set ")
+        val fieldsWithoutPrimary = entity.fields.filter { field -> !field.isPrimaryKey }
+        fieldsWithoutPrimary.forEachIndexed(fun(index, field) {
+            builder.append(field.column).append(" = ? ")
+            // No comma for last column
+            if(index < fieldsWithoutPrimary.size - 1) builder.append(", ")
+        })
+        builder.append("where ").append(entity.primaryKey.column).append(" = ?;")
+
+        return builder.toString()
+    }
+
     override fun delete(entity: EntityMeta): String {
         val builder = StringBuilder("delete from ")
             .append(entity.table)

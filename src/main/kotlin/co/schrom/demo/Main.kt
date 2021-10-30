@@ -34,4 +34,6 @@ fun main(args: Array<String>) {
     // Update model in database
     val authorUpdated = User(1, "Alex Doe Updated", "alex.doe.updated@example.org")
     orm.update(authorUpdated)
+
+    val authorGet = orm.get(User::class, 1)
 }

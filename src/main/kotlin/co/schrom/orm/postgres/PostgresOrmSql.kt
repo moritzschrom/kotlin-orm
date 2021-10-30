@@ -85,4 +85,14 @@ object PostgresOrmSql : OrmSql {
         return builder.toString()
     }
 
+    override fun get(entity: EntityMeta): String {
+        val builder = StringBuilder("select * from ")
+            .append(entity.table)
+            .append(" where ")
+            .append(entity.primaryKey.column)
+            .append(" = ?;")
+
+        return builder.toString()
+    }
+
 }

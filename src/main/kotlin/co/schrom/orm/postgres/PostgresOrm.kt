@@ -4,7 +4,9 @@ import co.schrom.orm.EntityMeta
 import co.schrom.orm.Orm
 import java.sql.Connection
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.primaryConstructor
 
 class PostgresOrm(override val connection: Connection) : Orm {
 
@@ -99,6 +101,33 @@ class PostgresOrm(override val connection: Connection) : Orm {
         preparedStatement.close()
 
         return success
+    }
+
+    override fun <T : Any> get(kClass: KClass<T>, primaryKey: Any): T? {
+        // Create an EntityMeta model
+        val entity = EntityMeta(kClass)
+
+        // Retrieve the SQL string
+        val sql = PostgresOrmSql.get(entity)
+
+        val preparedStatement = connection.prepareStatement(sql)
+        preparedStatement.setObject(1, primaryKey)
+        val rs = preparedStatement.executeQuery()
+
+        val constructor = kClass.primaryConstructor
+        val fieldValues = emptyMap<KParameter, Any?>().toMutableMap()
+
+        // Return null when the result set is empty or there is no constructor
+        if (!rs.next() || constructor === null) return null
+
+        // For each field of the entity:
+        // Read the data from the result set and set it to the parameters map
+        entity.fields.forEachIndexed(fun(index, field) {
+            val parameter = constructor.parameters.find { it.name === field.property.name }
+            fieldValues[parameter!!] = rs.getObject(index + 1)
+        })
+
+        return constructor.callBy(fieldValues)
     }
 
 }

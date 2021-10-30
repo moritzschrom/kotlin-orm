@@ -14,4 +14,6 @@ interface OrmSql {
 
     fun delete(entity: EntityMeta): String
 
+    fun get(entity: EntityMeta): String
+
 }

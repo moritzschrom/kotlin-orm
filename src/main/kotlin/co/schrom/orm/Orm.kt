@@ -15,4 +15,6 @@ interface Orm {
     fun update(obj: Any): Boolean
 
     fun delete(obj: Any): Boolean
+
+    fun <T: Any> get(kClass: KClass<T>, primaryKey: Any): T?
 }

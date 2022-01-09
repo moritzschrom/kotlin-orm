@@ -8,6 +8,10 @@ interface OrmSql {
 
     fun createTable(entity: EntityMeta): String
 
+    fun createAssignmentTables(entity: EntityMeta): String
+
+    fun dropAssignmentTablesIfExists(entity: EntityMeta): String
+
     fun insert(entity: EntityMeta): String
 
     fun update(entity: EntityMeta): String

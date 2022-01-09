@@ -10,6 +10,10 @@ interface Orm {
 
     fun createTable(kClass: KClass<*>)
 
+    fun createAssignmentTables(kClass: KClass<*>)
+
+    fun dropAssignmentTablesIfExist(kClass: KClass<*>)
+
     fun create(obj: Any): Boolean
 
     fun update(obj: Any): Boolean

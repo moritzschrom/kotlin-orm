@@ -1,7 +1,7 @@
 package co.schrom.orm
 
-import co.schrom.orm.annotations.Field
-import co.schrom.orm.annotations.PrimaryKey
+import co.schrom.orm.annotations.*
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.hasAnnotation
@@ -19,6 +19,14 @@ class FieldMeta(kProperty: KProperty1<*, *>) {
     val isPrimaryKey: Boolean
 
     val isNullable: Boolean
+
+    val isExternal: Boolean
+
+    val relationshipType: RelationshipType?
+
+    val relationshipEntity: KClass<*>?
+
+    val assignmentTable: String?
 
     init {
         // Retrieve the Field annotation from the parameter property
@@ -47,5 +55,19 @@ class FieldMeta(kProperty: KProperty1<*, *>) {
 
         // Set the isPrimaryKey property
         isPrimaryKey = kProperty.hasAnnotation<PrimaryKey>()
+
+        // Set properties related to the relationship
+        val relationshipAnnotation = kProperty.annotations.find { it is Relationship } as? Relationship
+        if(relationshipAnnotation is Relationship) {
+            isExternal = true
+            relationshipType = relationshipAnnotation.relationshipType
+            assignmentTable = relationshipAnnotation.assignmentTable
+            relationshipEntity = relationshipAnnotation.entity
+        } else {
+            isExternal = false
+            relationshipType = null
+            assignmentTable = null
+            relationshipEntity = null
+        }
     }
 }

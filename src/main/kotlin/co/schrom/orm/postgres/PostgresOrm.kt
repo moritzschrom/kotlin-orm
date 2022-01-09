@@ -2,7 +2,9 @@ package co.schrom.orm.postgres
 
 import co.schrom.orm.EntityMeta
 import co.schrom.orm.Orm
+import co.schrom.orm.annotations.RelationshipType
 import java.sql.Connection
+import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
@@ -34,6 +36,30 @@ class PostgresOrm(override val connection: Connection) : Orm {
         statement.close()
     }
 
+    override fun createAssignmentTables(kClass: KClass<*>) {
+        // Create an EntityMeta model
+        val entity = EntityMeta(kClass)
+
+        // Build the SQL string
+        val sql = PostgresOrmSql.createAssignmentTables(entity)
+
+        val statement = connection.createStatement()
+        statement.execute(sql)
+        statement.close()
+    }
+
+    override fun dropAssignmentTablesIfExist(kClass: KClass<*>) {
+        // Create an EntityMeta model
+        val entity = EntityMeta(kClass)
+
+        // Build the SQL string
+        val sql = PostgresOrmSql.dropAssignmentTablesIfExists(entity)
+
+        val statement = connection.createStatement()
+        statement.execute(sql)
+        statement.close()
+    }
+
     override fun create(obj: Any): Boolean {
         // Create an EntityMeta model
         val entity = EntityMeta(obj::class)
@@ -42,7 +68,7 @@ class PostgresOrm(override val connection: Connection) : Orm {
         val sql = PostgresOrmSql.insert(entity)
 
         val preparedStatement = connection.prepareStatement(sql)
-        entity.fields.forEachIndexed(fun(index, field) {
+        entity.internals.forEachIndexed(fun(index, field) {
             val property = field.property as KProperty1<Any, *>
             val value = property.get(obj)
 
@@ -65,7 +91,7 @@ class PostgresOrm(override val connection: Connection) : Orm {
         val preparedStatement = connection.prepareStatement(sql)
 
         // First set the normal fields
-        val fieldsWithoutPrimary = entity.fields.filter { field -> !field.isPrimaryKey }
+        val fieldsWithoutPrimary = entity.internals.filter { field -> !field.isPrimaryKey }
         var index = 1
         fieldsWithoutPrimary.forEach(fun(field) {
             val property = field.property as KProperty1<Any, *>
@@ -114,20 +140,49 @@ class PostgresOrm(override val connection: Connection) : Orm {
         preparedStatement.setObject(1, primaryKey)
         val rs = preparedStatement.executeQuery()
 
+        return createObjects(kClass, rs).firstOrNull()
+    }
+
+    fun <T : Any> createObjects(kClass: KClass<T>, rs: ResultSet): Collection<T> {
+        val entity = EntityMeta(kClass)
         val constructor = kClass.primaryConstructor
         val fieldValues = emptyMap<KParameter, Any?>().toMutableMap()
+        val list = arrayListOf<T>()
 
-        // Return null when the result set is empty or there is no constructor
-        if (!rs.next() || constructor === null) return null
+        while(rs.next() && constructor !== null) {
+            var primaryKeyCache: Any? = null
 
-        // For each field of the entity:
-        // Read the data from the result set and set it to the parameters map
-        entity.fields.forEachIndexed(fun(index, field) {
-            val parameter = constructor.parameters.find { it.name === field.property.name }
-            fieldValues[parameter!!] = rs.getObject(index + 1)
-        })
+            // For each internal field of the entity:
+            entity.internals.forEachIndexed(fun(index, field) {
+                val parameter = constructor.parameters.find { it.name === field.property.name }
+                val _object = rs.getObject(index + 1)
+                if(field.isPrimaryKey) {
+                    primaryKeyCache = _object
+                }
+                fieldValues[parameter!!] = _object
+            })
 
-        return constructor.callBy(fieldValues)
+            // For each external field of the entity
+            entity.externals.forEachIndexed(fun(index, field) {
+                val parameter = constructor.parameters.find { it.name === field.property.name }
+                val isMultiple = field.relationshipType === RelationshipType.MANY_TO_MANY || field.relationshipType === RelationshipType.ONE_TO_MANY
+
+                val sql = PostgresOrmSql.getRelationship(entity, field)
+                val preparedStatement = connection.prepareStatement(sql)
+                preparedStatement.setObject(1, primaryKeyCache)
+                val rsRelationships = preparedStatement.executeQuery()
+                val objects = createObjects(field.relationshipEntity!!, rsRelationships)
+                fieldValues[parameter!!] = if (isMultiple) {
+                    objects
+                } else {
+                    objects.first()
+                }
+            })
+
+            list.add(constructor.callBy(fieldValues))
+        }
+
+        return list;
     }
 
 }

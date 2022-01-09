@@ -25,7 +25,7 @@ class EntityMetaTest {
 
         // Assert
         assertEquals("t_test", entityMeta.table)
-        assertEquals(1, entityMeta.fields.size)
+        assertEquals(1, entityMeta.internals.size)
     }
 
     @Test
@@ -43,7 +43,7 @@ class EntityMetaTest {
 
         // Assert
         assertEquals("testclass", entityMeta.table)
-        assertEquals(1, entityMeta.fields.size)
+        assertEquals(1, entityMeta.internals.size)
     }
 
     @Test
@@ -63,7 +63,7 @@ class EntityMetaTest {
         val entityMeta = EntityMeta(TestClass::class)
 
         // Assert
-        assertEquals(1, entityMeta.fields.size)
+        assertEquals(1, entityMeta.internals.size)
     }
 
     @Test

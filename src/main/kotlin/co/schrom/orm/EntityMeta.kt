@@ -11,7 +11,9 @@ class EntityMeta(kClass: KClass<*>) {
 
     val table: String
 
-    val fields = arrayListOf<FieldMeta>()
+    val internals = arrayListOf<FieldMeta>()
+
+    val externals = arrayListOf<FieldMeta>()
 
     val primaryKey: FieldMeta
 
@@ -43,7 +45,11 @@ class EntityMeta(kClass: KClass<*>) {
             if(fieldMeta.isPrimaryKey) cachedPrimaryKey = fieldMeta
 
             // Add the current FieldMeta instance to the fields ArrayList
-            fields.add(fieldMeta)
+            if(fieldMeta.isExternal) {
+                externals.add(fieldMeta)
+            } else {
+                internals.add(fieldMeta)
+            }
         }
 
         // If there is no primary key present, throw an exception

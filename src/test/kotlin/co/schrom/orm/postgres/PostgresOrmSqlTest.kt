@@ -56,7 +56,7 @@ class PostgresOrmSqlTest {
         // Arrange
         val entity = mockk<EntityMeta>()
         every { entity.table } returns "t_table"
-        every { entity.fields } returns arrayListOf(
+        every { entity.internals } returns arrayListOf(
             mockk {
                 every { column } returns "id"
                 every { type } returns Int::class.createType()
@@ -84,7 +84,7 @@ class PostgresOrmSqlTest {
         // Arrange
         val entity = mockk<EntityMeta>()
         every { entity.table } returns "t_table"
-        every { entity.fields } returns arrayListOf(
+        every { entity.internals } returns arrayListOf(
             mockk {
                 every { column } returns "id"
                 every { type } returns Int::class.createType()
@@ -112,7 +112,7 @@ class PostgresOrmSqlTest {
         // Arrange
         val entity = mockk<EntityMeta>()
         every { entity.table } returns "t_table"
-        every { entity.fields } returns arrayListOf(
+        every { entity.internals } returns arrayListOf(
             mockk {
                 every { column } returns "id"
                 every { type } returns Int::class.createType()
@@ -147,7 +147,7 @@ class PostgresOrmSqlTest {
         }
         every { entity.table } returns "t_table"
         every { entity.primaryKey } returns idField
-        every { entity.fields } returns arrayListOf(
+        every { entity.internals } returns arrayListOf(
             idField,
             mockk {
                 every { column } returns "name"

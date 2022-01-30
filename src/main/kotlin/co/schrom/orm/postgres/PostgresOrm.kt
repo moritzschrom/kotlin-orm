@@ -2,6 +2,7 @@ package co.schrom.orm.postgres
 
 import co.schrom.orm.EntityMeta
 import co.schrom.orm.Orm
+import co.schrom.orm.QueryMeta
 import co.schrom.orm.annotations.RelationshipType
 import java.sql.Connection
 import java.sql.ResultSet
@@ -143,6 +144,25 @@ class PostgresOrm(override val connection: Connection) : Orm {
         return createObjects(kClass, rs).firstOrNull()
     }
 
+    override fun <T : Any> get(kClass: KClass<T>, query: QueryMeta<T>): Collection<T> {
+        // Retrieve the SQL string and the parameters
+        val sql = PostgresOrmSql.get(query)
+        val parameters = query.getParameters()
+
+        val preparedStatement = connection.prepareStatement(sql)
+        for((index, param) in parameters.withIndex()) {
+            preparedStatement.setObject(index + 1, param)
+        }
+
+        val rs = preparedStatement.executeQuery()
+        return createObjects(kClass, rs)
+    }
+
+    override fun <T : Any> query(kClass: KClass<T>): QueryMeta<T> {
+        val entity = EntityMeta(kClass)
+        return QueryMeta(entity)
+    }
+
     fun <T : Any> createObjects(kClass: KClass<T>, rs: ResultSet): Collection<T> {
         val entity = EntityMeta(kClass)
         val constructor = kClass.primaryConstructor
@@ -163,7 +183,7 @@ class PostgresOrm(override val connection: Connection) : Orm {
             })
 
             // For each external field of the entity
-            entity.externals.forEachIndexed(fun(index, field) {
+            entity.externals.forEach(fun(field) {
                 val parameter = constructor.parameters.find { it.name === field.property.name }
                 val isMultiple = field.relationshipType === RelationshipType.MANY_TO_MANY || field.relationshipType === RelationshipType.ONE_TO_MANY
 

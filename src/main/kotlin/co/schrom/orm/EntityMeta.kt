@@ -59,4 +59,8 @@ class EntityMeta(kClass: KClass<*>) {
         primaryKey = cachedPrimaryKey as FieldMeta
     }
 
+    fun getFieldByName(name: String): FieldMeta? {
+        return internals.find { it.property.name == name }
+    }
+
 }

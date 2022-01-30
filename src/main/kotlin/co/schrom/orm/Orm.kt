@@ -21,4 +21,8 @@ interface Orm {
     fun delete(obj: Any): Boolean
 
     fun <T: Any> get(kClass: KClass<T>, primaryKey: Any): T?
+
+    fun <T: Any> get(kClass: KClass<T>, query: QueryMeta<T>): Collection<T>
+
+    fun <T: Any> query(kClass: KClass<T>): QueryMeta<T>
 }

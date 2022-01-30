@@ -48,4 +48,9 @@ fun main(args: Array<String>) {
     println(sportNewsPostGet)
     val sportEventPostGet = orm.get(Post::class, 1)
     println(sportEventPostGet)
+
+    val query = orm.query(User::class)
+        .like("name", "%dOE%", true)
+        .or().like("email", "%@doe.com")
+    val authorsNamedDoe = orm.get(User::class, query)
 }

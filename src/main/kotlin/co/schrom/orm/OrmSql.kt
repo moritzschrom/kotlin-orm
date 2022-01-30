@@ -20,4 +20,6 @@ interface OrmSql {
 
     fun get(entity: EntityMeta): String
 
+    fun get(query: QueryMeta<*>): String
+
 }

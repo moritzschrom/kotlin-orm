@@ -1,8 +1,6 @@
 package co.schrom.orm.postgres
 
-import co.schrom.orm.EntityMeta
-import co.schrom.orm.FieldMeta
-import co.schrom.orm.OrmSql
+import co.schrom.orm.*
 import kotlin.reflect.full.createType
 
 object PostgresOrmSql : OrmSql {
@@ -129,6 +127,144 @@ object PostgresOrmSql : OrmSql {
             .append(" where ")
             .append(entity.primaryKey.column)
             .append(" = ?;")
+
+        return builder.toString()
+    }
+
+    override fun get(query: QueryMeta<*>): String {
+        val operations = arrayListOf<QueryMeta<*>>()
+        val entity = query.entity
+
+        var q: QueryMeta<*>? = query
+        while(q != null) {
+            operations.add(0, q)
+            q = q.previous
+        }
+
+        val builder = StringBuilder("select * from ")
+            .append(entity.table)
+
+        var conj = " where "
+        var not = false
+        var openBracket = StringBuilder()
+        var closeBracket = StringBuilder()
+        var op: String
+
+        for(operation in operations) {
+            when(operation.operation) {
+
+                QueryOperation.OR -> {
+                    if(conj != " where ") conj = " or "
+                }
+
+                QueryOperation.NOT -> {
+                    not = true
+                }
+
+                QueryOperation.GROUP -> {
+                    openBracket.append("(")
+                }
+
+                QueryOperation.END_GROUP -> {
+                    openBracket.append(")")
+                }
+
+                QueryOperation.EQUALS -> {
+                    val field = entity.getFieldByName(operation.args!![0] as String)
+                    val ignoreCase = operation.args!![2] as Boolean
+                    op = if (not) " != "  else " ); "
+                    builder
+                        .append(closeBracket)
+                        .append(conj)
+                        .append(openBracket)
+                        .append(if (ignoreCase) " lower(" + (field!!.column) + ")" else field!!.column)
+                        .append(op)
+                        .append(if (ignoreCase) "lower(?)" else "?")
+
+                    openBracket = StringBuilder()
+                    closeBracket = StringBuilder()
+                    conj = " and "
+                    not = false
+                }
+
+                QueryOperation.LIKE -> {
+                    val field = entity.getFieldByName(operation.args!![0] as String)
+                    val ignoreCase = operation.args!![2] as Boolean
+                    op = if (not) " not like "  else " like "
+                    builder
+                        .append(closeBracket)
+                        .append(conj)
+                        .append(openBracket)
+                        .append(if (ignoreCase) " lower(" + (field!!.column) + ")" else field!!.column)
+                        .append(op)
+                        .append(if (ignoreCase) "lower(?)" else "?")
+
+                    openBracket = StringBuilder()
+                    closeBracket = StringBuilder()
+                    conj = " and "
+                    not = false
+                }
+
+                QueryOperation.IN -> {
+                    val field = entity.getFieldByName(operation.args!![0] as String)
+                    println(field)
+                    builder
+                        .append(closeBracket)
+                        .append(conj)
+                        .append(openBracket)
+                        .append(field!!.column)
+                        .append(if (not) " not in ( " else " in ( ")
+
+                    for(i in 1 until operation.args!!.size) {
+                        if(i > 1) builder.append(" , ")
+                        builder.append(" ? ")
+                    }
+                    builder.append(" ) ")
+
+                    openBracket = StringBuilder()
+                    closeBracket = StringBuilder()
+                    conj = " and "
+                    not = false
+                }
+
+                QueryOperation.GT -> {
+                    val field = entity.getFieldByName(operation.args!![0] as String)
+                    op = if (not) " <= "  else " > "
+                    builder
+                        .append(closeBracket)
+                        .append(conj)
+                        .append(openBracket)
+                        .append(field!!.column)
+                        .append(op)
+                        .append(" ? ")
+
+                    openBracket = StringBuilder()
+                    closeBracket = StringBuilder()
+                    conj = " and "
+                    not = false
+                }
+
+                QueryOperation.LT -> {
+                    val field = entity.getFieldByName(operation.args!![0] as String)
+                    op = if (not) " >= "  else " < "
+                    builder
+                        .append(closeBracket)
+                        .append(conj)
+                        .append(openBracket)
+                        .append(field!!.column)
+                        .append(op)
+                        .append(" ? ")
+
+                    openBracket = StringBuilder()
+                    closeBracket = StringBuilder()
+                    conj = " and "
+                    not = false
+                }
+
+            }
+        }
+
+        builder.append(";")
 
         return builder.toString()
     }

@@ -163,6 +163,30 @@ class PostgresOrm(override val connection: Connection) : Orm {
         return QueryMeta(entity)
     }
 
+    override fun beginTransaction(): Boolean {
+        val sql = "BEGIN;"
+        val preparedStatement = connection.prepareStatement(sql)
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+        return success
+    }
+
+    override fun commit(): Boolean {
+        val sql = "COMMIT;"
+        val preparedStatement = connection.prepareStatement(sql)
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+        return success
+    }
+
+    override fun rollback(): Boolean {
+        val sql = "ROLLBACK;"
+        val preparedStatement = connection.prepareStatement(sql)
+        val success = preparedStatement.execute()
+        preparedStatement.close()
+        return success
+    }
+
     fun <T : Any> createObjects(kClass: KClass<T>, rs: ResultSet): Collection<T> {
         val entity = EntityMeta(kClass)
         val constructor = kClass.primaryConstructor

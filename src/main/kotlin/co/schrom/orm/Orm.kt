@@ -25,4 +25,10 @@ interface Orm {
     fun <T: Any> get(kClass: KClass<T>, query: QueryMeta<T>): Collection<T>
 
     fun <T: Any> query(kClass: KClass<T>): QueryMeta<T>
+
+    fun beginTransaction(): Boolean
+
+    fun commit(): Boolean
+
+    fun rollback(): Boolean
 }
